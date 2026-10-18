@@ -38,3 +38,5 @@ volumes:
 
 
 # Cau hinh Prometheus va Grafana
+
+# Cau hinh Loki
