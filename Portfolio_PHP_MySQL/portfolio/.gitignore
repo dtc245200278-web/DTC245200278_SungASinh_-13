@@ -9,3 +9,9 @@
 !/uploads/.gitkeep
 # Khoa rieng va chung chi HTTPS
 nginx/certs/server.key
+monitoring/mysql/.my.cnf
+monitoring/mysql/*.my.cnf
+
+# MySQL exporter secret
+monitoring/mysql/exporter_password
+monitoring/mysql/exporter.env

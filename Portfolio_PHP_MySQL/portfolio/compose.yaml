@@ -53,5 +53,54 @@ services:
     depends_on:
       - web
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.2
+    command:
+      - "--nginx.scrape-uri=http://nginx/nginx_status"
+    depends_on:
+      - nginx
+    mem_limit: 64m
+
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.17.2
+    command:
+      - "--mysqld.address=db:3306"
+      - "--mysqld.username=metrics"
+    env_file:
+      - ./monitoring/mysql/exporter.env
+    depends_on:
+      - db
+    mem_limit: 64m
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=3d"
+      - "--storage.tsdb.retention.size=256MB"
+    mem_limit: 256m
+    depends_on:
+      - nginx-exporter
+      - mysql-exporter
+
+  grafana:
+    image: grafana/grafana:12.2.1
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    mem_limit: 256m
+    depends_on:
+      - prometheus
+
 volumes:
   mysql_data:
+  prometheus_data:
+  grafana_data:
