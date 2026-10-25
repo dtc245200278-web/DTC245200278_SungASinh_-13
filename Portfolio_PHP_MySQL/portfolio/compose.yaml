@@ -1,7 +1,11 @@
+
 services:
   web:
     build: .
-    ports: ["127.0.0.1:8080:80"]
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./uploads:/var/www/html/uploads
     environment:
       DB_HOST: ${DB_HOST:?Set DB_HOST in .env}
       DB_PORT: ${DB_PORT:?Set DB_PORT in .env}
@@ -11,6 +15,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
   db:
     image: mysql:8.4
     environment:
@@ -26,17 +31,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
   phpmyadmin:
     image: phpmyadmin:5.2
-    ports: ["127.0.0.1:8081:80"]
+    ports:
+      - "127.0.0.1:8081:80"
     environment:
       PMA_HOST: ${DB_HOST:?Set DB_HOST in .env}
       PMA_PORT: ${DB_PORT:?Set DB_PORT in .env}
-    depends_on: [db]
+    depends_on:
+      - db
+
 volumes:
   mysql_data:
-
-
-# Cau hinh Prometheus va Grafana
-
-# Cau hinh Loki
