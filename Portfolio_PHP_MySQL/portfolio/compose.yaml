@@ -100,7 +100,34 @@ services:
     depends_on:
       - prometheus
 
+  loki:
+    image: grafana/loki:3.5.5
+    command:
+      - "-config.file=/etc/loki/loki-config.yaml"
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    mem_limit: 256m
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.5.5
+    command:
+      - "-config.file=/etc/promtail/promtail-config.yaml"
+    volumes:
+      - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail_positions:/tmp
+    depends_on:
+      - loki
+    mem_limit: 128m
+    restart: unless-stopped
+
 volumes:
   mysql_data:
   prometheus_data:
   grafana_data:
+  loki_data:
+  promtail_positions:
