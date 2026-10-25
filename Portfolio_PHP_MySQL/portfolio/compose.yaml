@@ -15,6 +15,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - web_net
+      - db_net
 
   db:
     image: mysql:8.4
@@ -31,6 +34,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+    networks:
+      - db_net
 
   phpmyadmin:
     image: phpmyadmin:5.2
@@ -41,6 +46,8 @@ services:
       PMA_PORT: ${DB_PORT:?Set DB_PORT in .env}
     depends_on:
       - db
+    networks:
+      - db_net
 
   nginx:
     image: nginx:1.28-alpine
@@ -52,6 +59,9 @@ services:
       - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - web
+    networks:
+      - web_net
+      - monitor_net
 
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:1.4.2
@@ -60,6 +70,8 @@ services:
     depends_on:
       - nginx
     mem_limit: 64m
+    networks:
+      - monitor_net
 
   mysql-exporter:
     image: prom/mysqld-exporter:v0.17.2
@@ -71,6 +83,9 @@ services:
     depends_on:
       - db
     mem_limit: 64m
+    networks:
+      - db_net
+      - monitor_net
 
   prometheus:
     image: prom/prometheus:v3.7.3
@@ -88,6 +103,8 @@ services:
     depends_on:
       - nginx-exporter
       - mysql-exporter
+    networks:
+      - monitor_net
 
   grafana:
     image: grafana/grafana:12.2.1
@@ -99,6 +116,8 @@ services:
     mem_limit: 256m
     depends_on:
       - prometheus
+    networks:
+      - monitor_net
 
   loki:
     image: grafana/loki:3.5.5
@@ -111,6 +130,8 @@ services:
       - "127.0.0.1:3100:3100"
     mem_limit: 256m
     restart: unless-stopped
+    networks:
+      - monitor_net
 
   promtail:
     image: grafana/promtail:3.5.5
@@ -124,6 +145,8 @@ services:
       - loki
     mem_limit: 128m
     restart: unless-stopped
+    networks:
+      - monitor_net
 
 volumes:
   mysql_data:
@@ -131,3 +154,14 @@ volumes:
   grafana_data:
   loki_data:
   promtail_positions:
+
+networks:
+  web_net:
+    external: true
+    name: web_net_DTC245200278
+  db_net:
+    external: true
+    name: db_net_DTC245200278
+  monitor_net:
+    external: true
+    name: monitor_net_DTC245200278
