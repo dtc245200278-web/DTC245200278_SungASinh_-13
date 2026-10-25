@@ -7,3 +7,5 @@
 # Anh duoc tai len khi chay website
 /uploads/*
 !/uploads/.gitkeep
+# Khoa rieng va chung chi HTTPS
+nginx/certs/server.key
